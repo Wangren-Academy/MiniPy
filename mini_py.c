@@ -13,7 +13,7 @@ jmp_buf error_buf;
 // ---------- 词法分析 ----------
 typedef enum {
     TOK_NUM, TOK_ID, TOK_PRINT, TOK_ASSIGN,
-    TOK_PLUS, TOK_MINUS, TOK_MUL, TOK_DIV,
+    TOK_PLUS, TOK_MINUS, TOK_MUL, TOK_DIV, TOK_MOD,
     TOK_LPAREN, TOK_RPAREN, TOK_EOF, TOK_ERROR
 } TokenType;
 
@@ -70,6 +70,7 @@ void next_token() {
         case '-': cur_token.type = TOK_MINUS; break;
         case '*': cur_token.type = TOK_MUL; break;
         case '/': cur_token.type = TOK_DIV; break;
+        case '%': cur_token.type = TOK_MOD; break;
         case '(': cur_token.type = TOK_LPAREN; break;
         case ')': cur_token.type = TOK_RPAREN; break;
         default: longjmp(error_buf, 1); // 未知字符
@@ -108,12 +109,13 @@ int parse_primary() {
 // 解析乘除（优先级高）
 int parse_term() {
     int left = parse_primary();
-    while (cur_token.type == TOK_MUL || cur_token.type == TOK_DIV) {
+    while (cur_token.type == TOK_MUL || cur_token.type == TOK_DIV || cur_token.type == TOK_MOD) {
         TokenType op = cur_token.type;
         next_token();
         int right = parse_primary();
         if (op == TOK_MUL) left = left * right;
-        else left = left / right; // 整数除法
+        else if (op == TOK_DIV) left = left / right;
+        else left = left % right;
     }
     return left;
 }

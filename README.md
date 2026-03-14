@@ -10,4 +10,6 @@ gcc -o mini_py mini_py.c
 >>> z = (x + y) * 2
 >>> print z
 16
+>>> print z % 7
+2
 >>> exit
